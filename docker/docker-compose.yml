@@ -1,0 +1,9 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"

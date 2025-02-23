@@ -1,0 +1,28 @@
+hyperliquid:
+  api_key: "0x41fae5f32f829f4a2e58688d681c4bb91a95f491"  # HyperLiquid API key
+  base_url: "https://api.hyperliquid.xyz"
+  symbols:
+    - "BTC"
+    - "ETH"
+  
+processing:
+  timeframe: "1m"  # Base timeframe for data
+  orderbook_depth: 10
+  missing_values: "interpolate"  # Strategy for handling missing values: interpolate, ffill, or drop
+  window_sizes:  # Window sizes for feature calculation
+    - 5
+    - 20
+    - 50
+  
+local_storage:
+  raw: "data/raw"
+  processed: "data/processed"
+  
+clustering:
+  n_clusters: 5
+  features:
+    - "volatility"
+    - "volume"
+    - "spread"
+    - "funding_rate"
+    - "orderbook_imbalance"

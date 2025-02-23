@@ -1,0 +1,56 @@
+groups:
+  - name: risk_monitoring
+    rules:
+      - alert: HighMarginUtilization
+        expr: margin_buffer_ratio < 0.2
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High margin utilization detected
+          description: Margin buffer ratio is below 20% for 5 minutes
+
+      - alert: ExcessiveVolatility
+        expr: volatility_ratio > 2.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Excessive market volatility
+          description: Short-term volatility is more than 2x the long-term average
+
+      - alert: LiquidationRiskHigh
+        expr: liquidation_risk > 0.8
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: High liquidation risk
+          description: Position is at risk of liquidation
+
+      - alert: HighSystemLoad
+        expr: rate(request_duration_seconds_sum[5m]) / rate(request_duration_seconds_count[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High system load detected
+          description: Average request duration is above 100ms for 5 minutes
+
+      - alert: ErrorRateHigh
+        expr: rate(error_total[5m]) / rate(request_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate is above 1% for 5 minutes
+
+      - alert: MemoryUsageHigh
+        expr: process_resident_memory_bytes > 200 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage
+          description: Memory usage is above 200MB

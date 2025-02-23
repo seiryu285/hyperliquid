@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Development environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-build
+    volumes:
+      - ./frontend:/app/frontend
+      - ./backend:/app/backend
+      - ./simulator:/app/simulator
+      - ./risk_management:/app/risk_management
+      - ./config:/app/config
+      - ./data:/app/data
+    ports:
+      - "3000:3000"  # Frontend dev server
+      - "8000:8000"  # WebSocket server
+    environment:
+      - NODE_ENV=development
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "cd frontend && npm start & 
+             python -m backend.websocket_server"
+
+  # Production environment
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test environment
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./tests:/app/tests
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=test
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "python -m pytest tests/unit_tests tests/integration_tests tests/performance_tests --junitxml=test-results/junit.xml"
+
+  # Monitoring service
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "9090:9090"  # Prometheus
+      - "3001:3000"  # Grafana
+    environment:
+      - NODE_ENV=production
+      - MONITORING=true
+    depends_on:
+      - prod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

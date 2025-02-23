@@ -1,0 +1,18 @@
+# Hyperparameters for model training and trading strategies
+# Define your hyperparameters here.
+
+# Risk Monitoring Parameters
+risk_thresholds:
+  min_margin_buffer: 1.5  # Minimum ratio of current margin to required margin
+  max_volatility_ratio: 2.0  # Maximum ratio of short-term to long-term volatility
+  max_liquidation_risk: 0.7  # Maximum liquidation risk score (0-1)
+  max_var: 100000  # Maximum Value at Risk in USD
+  max_drawdown: 0.2  # Maximum allowed drawdown
+
+monitoring:
+  volatility_window_short: 60  # 1 hour (assuming minute data)
+  volatility_window_long: 1440  # 24 hours
+  var_confidence_level: 0.95
+  risk_check_interval: 60  # Check risks every 60 seconds
+  price_history_max_size: 10000  # Maximum number of price points to store
+  alert_cooldown: 300  # Minimum time between repeated alerts (seconds)
