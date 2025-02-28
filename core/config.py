@@ -59,6 +59,42 @@ class Settings(BaseModel):
     ANOMALY_DETECTION_THRESHOLD: float = Field(default=-0.5)
     MODEL_UPDATE_INTERVAL: int = Field(default=86400)  # seconds
     
+    # LSTM Model settings
+    LSTM_UNITS: int = Field(default=128)
+    LSTM_DROPOUT: float = Field(default=0.2)
+    LSTM_RECURRENT_DROPOUT: float = Field(default=0.2)
+    LSTM_SEQUENCE_LENGTH: int = Field(default=60)  # Number of timepoints to look back
+    LSTM_PREDICTION_HORIZON: int = Field(default=12)  # Number of timepoints to predict forward
+    
+    # Transformer Model settings
+    TRANSFORMER_NUM_LAYERS: int = Field(default=4)
+    TRANSFORMER_NUM_HEADS: int = Field(default=8)
+    TRANSFORMER_KEY_DIM: int = Field(default=64)
+    TRANSFORMER_DROPOUT: float = Field(default=0.1)
+    TRANSFORMER_SEQUENCE_LENGTH: int = Field(default=96)  # Number of timepoints to look back
+    
+    # Training settings
+    BATCH_SIZE: int = Field(default=64)
+    EPOCHS: int = Field(default=100)
+    LEARNING_RATE: float = Field(default=0.001)
+    EARLY_STOPPING_PATIENCE: int = Field(default=10)
+    VALIDATION_SPLIT: float = Field(default=0.2)
+    TEST_SPLIT: float = Field(default=0.1)
+    
+    # HyperLiquid API settings
+    HYPERLIQUID_API_URL: str = Field(default="https://api.hyperliquid-testnet.xyz")
+    HYPERLIQUID_WS_URL: str = Field(default="wss://api.hyperliquid-testnet.xyz/ws")
+    
+    # Trading settings
+    ENVIRONMENT: str = Field(default="testnet")
+    INITIAL_CAPITAL: float = Field(default=1000.0)
+    MAX_POSITION_SIZE: float = Field(default=0.1)
+    MAX_DRAWDOWN: float = Field(default=0.05)
+    RISK_PER_TRADE: float = Field(default=0.01)
+    
+    # Single symbol focus
+    PRIMARY_SYMBOL: str = Field(default="ETH-PERP")
+    
     class Config:
         """Pydantic config."""
         env_file = ".env"

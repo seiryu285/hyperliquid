@@ -1,125 +1,57 @@
-# HyperLiquid Trading Agent
+# Project Overview
 
-An advanced trading agent for the HyperLiquid platform, featuring anomaly detection, risk management, and reinforcement learning capabilities.
+This project is designed for the Hyper Liquid Agent, including environment setup, data processing, execution strategies, risk management, RL agents, and more.
 
-## Features
+## Setup
+Run the setup_project.py script to generate the directory structure.
 
-### Core Components
+## CI/CD Pipeline
 
-1. **Caching System**
-   - Redis-based caching with in-memory fallback
-   - Thread-safe operations
-   - Bulk operations optimization
-   - Automatic retry and error handling
+The project includes a GitHub Actions workflow for continuous integration and continuous deployment. The workflow is configured to:
 
-2. **Anomaly Detection**
-   - Market data anomaly detection using Isolation Forest
-   - Model persistence and automatic updates
-   - Real-time data processing
-   - Alert notification system
+1. Run tests on every push to the main, master, develop, and feature branches
+2. Build and push a Docker image on pushes to the main or master branch
+3. Deploy the application to the production environment on pushes to the main or master branch
 
-3. **Risk Management**
-   - Kelly Criterion position sizing
-   - Risk metrics calculation
-   - Automated loss limitation
-   - Portfolio optimization
+The CI/CD pipeline is defined in `.github/workflows/ci-cd.yml`.
 
-4. **Reinforcement Learning**
-   - Custom PPO implementation
-   - GRPO extensions
-   - Custom loss functions
-   - Market state representation
+## Data Visualization
 
-## Installation
+The project includes a data visualization dashboard for monitoring market data from HyperLiquid. The dashboard provides:
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/hyperliquid-agent.git
-cd hyperliquid-agent
-```
+- Real-time price charts with candlestick data
+- Order book visualization
+- Technical indicators (RSI, MACD, Bollinger Bands, etc.)
+- Position summary and risk assessment
+- Recent trades table
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+### Frontend
 
-3. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+The frontend is built with React and TypeScript, using Material-UI for the component library. The main dashboard components are located in `frontend/src/pages/Dashboard/`.
 
-4. Start Redis server:
-```bash
-redis-server
-```
+### API
 
-## Usage
+The backend API is built with FastAPI and provides endpoints for:
 
-1. Prepare backtest data:
-```bash
-python scripts/prepare_backtest_data.py
-```
+- Market data (order book, trades, ticker)
+- OHLCV data with technical indicators
+- Account information
+- Order management (create, cancel, history)
 
-2. Train the anomaly detection model:
-```bash
-python scripts/train_anomaly_detector.py
-```
+The API server is defined in `api/server.py`.
 
-3. Start the trading agent:
-```bash
-python main.py
-```
+## Running the Application
 
-## Project Structure
-
-```
-project_root/
-├── core/                 # Core functionality
-│   ├── cache.py         # Caching system
-│   └── config.py        # Configuration management
-├── ml/                  # Machine learning components
-│   └── anomaly_detection.py
-├── risk_management/     # Risk management tools
-│   └── position_sizing/
-├── rl_agent/           # Reinforcement learning
-│   └── algorithms/
-├── scripts/            # Utility scripts
-├── tests/              # Test suite
-└── main.py            # Application entry point
-```
-
-## Development
-
-1. Install development dependencies:
-```bash
-pip install -r requirements-dev.txt
-```
-
-2. Run tests:
-```bash
-pytest
-```
-
-3. Check code style:
-```bash
-black .
-flake8
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- HyperLiquid team for their excellent platform
-- Contributors and maintainers of the open-source libraries used in this project
+1. Create a `.env` file based on `.env.example` with your HyperLiquid API credentials
+2. Start the backend API:
+   ```
+   cd project_root
+   python -m api.server
+   ```
+3. Start the frontend development server:
+   ```
+   cd project_root/frontend
+   npm install
+   npm start
+   ```
+4. Access the dashboard at http://localhost:3000
