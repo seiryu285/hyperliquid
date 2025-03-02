@@ -1,0 +1,65 @@
+# Market Data Collection Configuration
+
+# API Settings
+api:
+  base_url: "https://api.hyperliquid.xyz"
+  ws_url: "wss://api.hyperliquid.xyz/ws"
+  api_key: "${HYPERLIQUID_API_KEY}"  # Load from environment variable
+  api_secret: "${HYPERLIQUID_API_SECRET}"  # Load from environment variable
+  timeout: 30  # seconds
+  max_retries: 3
+  retry_delay: 5  # seconds
+
+# WebSocket Settings
+websocket:
+  ping_interval: 30  # seconds
+  reconnect_attempts: 5
+  reconnect_delay: 5  # seconds
+  connection_timeout: 60  # seconds
+  heartbeat_timeout: 30  # seconds
+
+# Data Collection
+collection:
+  symbols:
+    - "BTC-USD"
+    - "ETH-USD"
+    - "SOL-USD"
+  channels:
+    - "trades"
+    - "orderbook"
+    - "ticker"
+  orderbook_depth: 20
+  trade_history_limit: 1000
+  update_interval: 1  # seconds
+
+# Data Processing
+processing:
+  batch_size: 100
+  max_queue_size: 10000
+  validation_enabled: true
+  normalization_enabled: true
+  missing_data_threshold: 0.1  # 10% missing data allowed
+  outlier_std_threshold: 3.0  # Standard deviations for outlier detection
+
+# Storage
+storage:
+  type: "mongodb"  # or "postgresql"
+  mongodb:
+    uri: "${MONGODB_URI}"
+    database: "market_data"
+    collections:
+      trades: "trades"
+      orderbook: "orderbook"
+      ticker: "ticker"
+  compression_enabled: true
+  retention_days: 30
+  backup_enabled: true
+  backup_interval: 86400  # 24 hours in seconds
+
+# Logging
+logging:
+  level: "INFO"
+  file_path: "logs/market_data.log"
+  rotation: "1 day"
+  retention: "30 days"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
