@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
   const [wsLatency, setWsLatency] = useState<number | null>(null);
   
   // 注文状態
-  const [orderStatus, setOrderStatus] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [orderStatus, setOrderStatus] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   
   // WebSocketクライアントの取得
@@ -452,18 +452,18 @@ const Dashboard: React.FC = () => {
       </Grid>
       
       {/* 注文ステータス通知 */}
-      <Snackbar
-        open={!!orderStatus}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        {orderStatus && (
+      {orderStatus && (
+        <Snackbar
+          open={true}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
           <Alert onClose={handleCloseSnackbar} severity={orderStatus.type}>
             {orderStatus.message}
           </Alert>
-        )}
-      </Snackbar>
+        </Snackbar>
+      )}
     </Box>
   );
 };
