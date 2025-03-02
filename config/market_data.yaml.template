@@ -1,0 +1,39 @@
+api:
+  base_url: "wss://api.hyperliquid.xyz/ws"
+  api_key: "${HYPERLIQUID_API_KEY}"
+  api_secret: "${HYPERLIQUID_API_SECRET}"
+
+websocket:
+  ping_interval: 30  # seconds
+  connection_timeout: 60  # seconds
+  max_queue_size: 1000
+
+retry:
+  max_attempts: 5
+  initial_delay: 1  # seconds
+  max_delay: 30    # seconds
+
+processing:
+  max_queue_size: 1000
+  batch_size: 100
+  worker_threads: 4
+
+monitoring:
+  metrics_port: 9090
+  log_level: INFO
+  enable_prometheus: true
+  enable_grafana: true
+
+storage:
+  mongodb:
+    uri: "${MONGODB_URI}"
+    database: "market_data"
+    collections:
+      trades: "trades"
+      orderbook: "orderbook"
+      metrics: "metrics"
+
+symbols:
+  - "BTC-PERP"
+  - "ETH-PERP"
+  - "SOL-PERP"
