@@ -9,7 +9,9 @@ import {
   Paper, 
   Box,
   Typography,
-  Divider
+  Divider,
+  useTheme,
+  alpha
 } from '@mui/material';
 
 interface OrderBookProps {
@@ -21,6 +23,7 @@ interface OrderBookProps {
 
 const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
   const { bids, asks } = orderBook;
+  const theme = useTheme();
   
   // 注文板の深さを計算
   const calculateDepth = (orders: [number, number][], index: number): number => {
@@ -61,16 +64,81 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
     return size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
   };
 
+  // 売り注文と買い注文の色
+  const askColor = theme.palette.error.main;
+  const bidColor = theme.palette.success.main;
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <TableContainer component={Paper} sx={{ maxHeight: '100%', overflow: 'auto', flex: 1 }}>
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          maxHeight: '100%', 
+          overflow: 'auto', 
+          flex: 1,
+          bgcolor: 'background.paper',
+          borderRadius: 1,
+          boxShadow: 'none',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: alpha(theme.palette.text.primary, 0.05),
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: alpha(theme.palette.text.primary, 0.2),
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.text.primary, 0.3),
+            },
+          },
+        }}
+      >
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="right">価格</TableCell>
-              <TableCell align="right">数量</TableCell>
-              <TableCell align="right">合計</TableCell>
-              <TableCell align="left" sx={{ width: '40%' }}>深さ</TableCell>
+              <TableCell 
+                align="right" 
+                sx={{ 
+                  fontWeight: 'bold', 
+                  py: 1.5,
+                  bgcolor: alpha(theme.palette.background.paper, 0.9),
+                }}
+              >
+                価格
+              </TableCell>
+              <TableCell 
+                align="right"
+                sx={{ 
+                  fontWeight: 'bold', 
+                  py: 1.5,
+                  bgcolor: alpha(theme.palette.background.paper, 0.9),
+                }}
+              >
+                数量
+              </TableCell>
+              <TableCell 
+                align="right"
+                sx={{ 
+                  fontWeight: 'bold', 
+                  py: 1.5,
+                  bgcolor: alpha(theme.palette.background.paper, 0.9),
+                }}
+              >
+                合計
+              </TableCell>
+              <TableCell 
+                align="left" 
+                sx={{ 
+                  width: '40%', 
+                  fontWeight: 'bold', 
+                  py: 1.5,
+                  bgcolor: alpha(theme.palette.background.paper, 0.9),
+                }}
+              >
+                深さ
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -80,18 +148,33 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
               const depthPercentage = (depth / maxDepth) * 100;
               
               return (
-                <TableRow key={`ask-${index}`}>
-                  <TableCell align="right" sx={{ color: 'error.main' }}>
+                <TableRow 
+                  key={`ask-${index}`}
+                  hover
+                  sx={{ 
+                    '&:hover': { 
+                      bgcolor: alpha(askColor, 0.05),
+                    },
+                  }}
+                >
+                  <TableCell 
+                    align="right" 
+                    sx={{ 
+                      color: askColor,
+                      fontWeight: 500,
+                      py: 1,
+                    }}
+                  >
                     {formatPrice(ask[0])}
                   </TableCell>
-                  <TableCell align="right">{formatSize(ask[1])}</TableCell>
-                  <TableCell align="right">{formatSize(depth)}</TableCell>
-                  <TableCell align="left">
+                  <TableCell align="right" sx={{ py: 1 }}>{formatSize(ask[1])}</TableCell>
+                  <TableCell align="right" sx={{ py: 1 }}>{formatSize(depth)}</TableCell>
+                  <TableCell align="left" sx={{ py: 1 }}>
                     <Box
                       sx={{
                         width: `${depthPercentage}%`,
                         height: '80%',
-                        backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                        backgroundColor: alpha(askColor, 0.2),
                         borderRadius: 1
                       }}
                     />
@@ -102,13 +185,11 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
             
             {/* スプレッド表示 */}
             {bids.length > 0 && asks.length > 0 && (
-              <TableRow>
-                <TableCell colSpan={4} sx={{ py: 0.5 }}>
-                  <Divider />
-                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'center' }}>
+              <TableRow sx={{ bgcolor: alpha(theme.palette.divider, 0.05) }}>
+                <TableCell colSpan={4} align="center" sx={{ py: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
                     スプレッド: {formatPrice(asks[0][0] - bids[0][0])} ({((asks[0][0] / bids[0][0] - 1) * 100).toFixed(2)}%)
                   </Typography>
-                  <Divider />
                 </TableCell>
               </TableRow>
             )}
@@ -119,18 +200,33 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
               const depthPercentage = (depth / maxDepth) * 100;
               
               return (
-                <TableRow key={`bid-${index}`}>
-                  <TableCell align="right" sx={{ color: 'success.main' }}>
+                <TableRow 
+                  key={`bid-${index}`}
+                  hover
+                  sx={{ 
+                    '&:hover': { 
+                      bgcolor: alpha(bidColor, 0.05),
+                    },
+                  }}
+                >
+                  <TableCell 
+                    align="right" 
+                    sx={{ 
+                      color: bidColor,
+                      fontWeight: 500,
+                      py: 1,
+                    }}
+                  >
                     {formatPrice(bid[0])}
                   </TableCell>
-                  <TableCell align="right">{formatSize(bid[1])}</TableCell>
-                  <TableCell align="right">{formatSize(depth)}</TableCell>
-                  <TableCell align="left">
+                  <TableCell align="right" sx={{ py: 1 }}>{formatSize(bid[1])}</TableCell>
+                  <TableCell align="right" sx={{ py: 1 }}>{formatSize(depth)}</TableCell>
+                  <TableCell align="left" sx={{ py: 1 }}>
                     <Box
                       sx={{
                         width: `${depthPercentage}%`,
                         height: '80%',
-                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        backgroundColor: alpha(bidColor, 0.2),
                         borderRadius: 1
                       }}
                     />

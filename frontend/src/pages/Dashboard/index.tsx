@@ -322,7 +322,7 @@ const Dashboard: React.FC = () => {
   
   return (
     <Box sx={{ flexGrow: 1, p: 3, height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4" component="h1" gutterBottom>
           トレーディングダッシュボード
         </Typography>
@@ -338,13 +338,22 @@ const Dashboard: React.FC = () => {
         </Alert>
       )}
       
-      <Grid container spacing={2} sx={{ height: 'calc(100% - 60px)' }}>
+      <Grid container spacing={3} sx={{ height: 'calc(100% - 60px)' }}>
         {/* 左側: チャートと取引履歴 */}
         <Grid item xs={12} md={8} sx={{ height: '100%' }}>
-          <Grid container spacing={2} sx={{ height: '100%' }}>
+          <Grid container spacing={3} sx={{ height: '100%' }}>
             {/* チャート */}
             <Grid item xs={12} sx={{ height: '60%' }}>
-              <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Paper 
+                sx={{ 
+                  p: 2, 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                }}
+              >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                   <Typography variant="h6" component="h2">
                     価格チャート
@@ -352,6 +361,7 @@ const Dashboard: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Button
                       size="small"
+                      variant="outlined"
                       startIcon={is3DView ? <View2dIcon /> : <View3dIcon />}
                       onClick={() => setIs3DView(!is3DView)}
                       sx={{ mr: 1 }}
@@ -364,13 +374,16 @@ const Dashboard: React.FC = () => {
                           size="small"
                           checked={autoRefresh}
                           onChange={(e) => setAutoRefresh(e.target.checked)}
+                          color="primary"
                         />
                       }
                       label="自動更新"
                     />
                     <Button
                       size="small"
-                      startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
+                      variant="contained"
+                      color="primary"
+                      startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <RefreshIcon />}
                       onClick={handleRefresh}
                       disabled={loading || autoRefresh}
                     >
@@ -392,8 +405,27 @@ const Dashboard: React.FC = () => {
             
             {/* 取引履歴とオーダー履歴のタブ */}
             <Grid item xs={12} sx={{ height: '40%' }}>
-              <Paper sx={{ height: '100%' }}>
-                <Tabs value={tabValue} onChange={handleTabChange} aria-label="trading tabs">
+              <Paper 
+                sx={{ 
+                  height: '100%',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                  overflow: 'hidden'
+                }}
+              >
+                <Tabs 
+                  value={tabValue} 
+                  onChange={handleTabChange} 
+                  aria-label="trading tabs"
+                  sx={{
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    '& .MuiTab-root': {
+                      py: 1.5,
+                      fontWeight: 500
+                    }
+                  }}
+                >
                   <Tab label="取引履歴" id="tab-0" aria-controls="tabpanel-0" />
                   <Tab label="注文履歴" id="tab-1" aria-controls="tabpanel-1" />
                 </Tabs>
@@ -410,10 +442,17 @@ const Dashboard: React.FC = () => {
         
         {/* 右側: 注文板と注文フォーム */}
         <Grid item xs={12} md={4} sx={{ height: '100%' }}>
-          <Grid container spacing={2} sx={{ height: '100%' }}>
+          <Grid container spacing={3} sx={{ height: '100%' }}>
             {/* 注文板 */}
             <Grid item xs={12} sx={{ height: '60%' }}>
-              <Paper sx={{ p: 2, height: '100%' }}>
+              <Paper 
+                sx={{ 
+                  p: 2, 
+                  height: '100%',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                }}
+              >
                 <Typography variant="h6" component="h2" gutterBottom>
                   注文板
                 </Typography>
@@ -423,7 +462,14 @@ const Dashboard: React.FC = () => {
             
             {/* 注文フォーム */}
             <Grid item xs={12} sx={{ height: '40%' }}>
-              <Paper sx={{ p: 2, height: '100%' }}>
+              <Paper 
+                sx={{ 
+                  p: 2, 
+                  height: '100%',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                }}
+              >
                 <Typography variant="h6" component="h2" gutterBottom>
                   注文
                 </Typography>
@@ -459,7 +505,12 @@ const Dashboard: React.FC = () => {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          <Alert onClose={handleCloseSnackbar} severity={orderStatus.type}>
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={orderStatus.type}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
             {orderStatus.message}
           </Alert>
         </Snackbar>
