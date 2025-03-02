@@ -1,23 +1,26 @@
 import React, { useEffect, useRef } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import * as echarts from 'echarts';
+import { OHLCVData } from '../types/market';
 
-interface OHLCVData {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
+// @ts-ignore
+import { graphic } from 'echarts';
 
 interface PriceChartProps {
   data: OHLCVData[];
+  theme?: 'light' | 'dark';
+  height?: number;
+  width?: string;
   is3D?: boolean;
-  loading?: boolean;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({ data, is3D = false, loading = false }) => {
+const PriceChart: React.FC<PriceChartProps> = ({ 
+  data, 
+  theme = 'dark', 
+  height = 400, 
+  width = '100%',
+  is3D = false
+}) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
 
@@ -272,46 +275,49 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, is3D = false, loading = f
         ];
         
         // 3D効果を追加
-        (option.series as any)[0].type = 'custom';
-        (option.series as any)[0].renderItem = function (params: any, api: any) {
-          const xValue = api.value(0);
-          const openPoint = api.coord([xValue, api.value(1)]);
-          const closePoint = api.coord([xValue, api.value(2)]);
-          const lowPoint = api.coord([xValue, api.value(3)]);
-          const highPoint = api.coord([xValue, api.value(4)]);
-          const rectWidth = api.size([1, 0])[0] * 0.6;
-          
-          const style = api.style({
-            stroke: api.visual('color'),
-            fill: api.visual('color')
-          });
-          
-          return {
-            type: 'group',
-            children: [
-              {
-                type: 'rect',
-                shape: {
-                  x: openPoint[0] - rectWidth / 2,
-                  y: Math.min(openPoint[1], closePoint[1]),
-                  width: rectWidth,
-                  height: Math.abs(closePoint[1] - openPoint[1])
+        if (option.series && Array.isArray(option.series) && option.series.length > 0) {
+          const candlestickSeries = option.series[0];
+          (candlestickSeries as any).type = 'custom';
+          (candlestickSeries as any).renderItem = function (params: any, api: any) {
+            const xValue = api.value(0);
+            const openPoint = api.coord([xValue, api.value(1)]);
+            const closePoint = api.coord([xValue, api.value(2)]);
+            const lowPoint = api.coord([xValue, api.value(3)]);
+            const highPoint = api.coord([xValue, api.value(4)]);
+            const rectWidth = api.size([1, 0])[0] * 0.6;
+            
+            const style = api.style({
+              stroke: api.visual('color'),
+              fill: api.visual('color')
+            });
+            
+            return {
+              type: 'group',
+              children: [
+                {
+                  type: 'rect',
+                  shape: {
+                    x: openPoint[0] - rectWidth / 2,
+                    y: Math.min(openPoint[1], closePoint[1]),
+                    width: rectWidth,
+                    height: Math.abs(closePoint[1] - openPoint[1])
+                  },
+                  style
                 },
-                style: style
-              },
-              {
-                type: 'line',
-                shape: {
-                  x1: lowPoint[0],
-                  y1: lowPoint[1],
-                  x2: highPoint[0],
-                  y2: highPoint[1]
-                },
-                style: style
-              }
-            ]
+                {
+                  type: 'line',
+                  shape: {
+                    x1: lowPoint[0],
+                    y1: lowPoint[1],
+                    x2: highPoint[0],
+                    y2: highPoint[1]
+                  },
+                  style
+                }
+              ]
+            };
           };
-        };
+        }
       }
 
       // チャートの描画
@@ -342,45 +348,25 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, is3D = false, loading = f
 
   return (
     <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
-      {loading && (
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            zIndex: 1
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
-      
-      {data.length === 0 && !loading ? (
+      {data.length === 0 ? (
         <Box 
           sx={{ 
             height: '100%', 
+            width: '100%', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center' 
           }}
         >
-          <Typography variant="body2" color="text.secondary">
-            チャートデータがありません
-          </Typography>
+          <div>No data available</div>
         </Box>
       ) : (
         <div 
           ref={chartRef} 
           style={{ 
-            width: '100%', 
-            height: '100%'
-          }}
+            height: '100%', 
+            width: '100%' 
+          }} 
         />
       )}
     </Box>

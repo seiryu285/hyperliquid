@@ -1,17 +1,5 @@
 import { Subject, Observable } from 'rxjs';
-
-export interface MarketData {
-  timestamp: number;
-  currentPrice: number;
-  bidPrice: number;
-  askPrice: number;
-  volume24h: number;
-  fundingRate: number;
-  orderbook: {
-    bids: [number, number][];
-    asks: [number, number][];
-  };
-}
+import { MarketData } from '../types/market';
 
 export interface PositionData {
   timestamp: number;

@@ -1,7 +1,8 @@
 // API関数：市場データとOHLCVデータの取得
 import { HyperLiquidApiClient, ApiResponse, createApiClientFromEnv } from './apiClient';
 import { HyperLiquidWebSocketClient, WebSocketMessageHandler, createWebSocketClientFromEnv } from './webSocketClient';
-import { Order, OrderParams, OrderResponse, OrderSide, OrderStatus, OrderType, TimeInForce } from '../types/order';
+import { Order, OrderParams, OrderResponse, OrderSide, OrderType, TimeInForce, OrderStatus } from '../types/order';
+import { MarketData, OrderBook, Position, Trade, OHLCVData, SymbolInfo } from '../types/market';
 
 // シングルトンインスタンス
 let apiClient: HyperLiquidApiClient | null = null;
@@ -40,13 +41,13 @@ const generateMockData = () => {
   const currentPrice = 3000 + Math.random() * 500;
   
   // モックのオーダーブック
-  const orderBook = {
+  const orderBook: OrderBook = {
     bids: Array(20).fill(0).map((_, i) => [currentPrice - (i + 1) * 5, 10 + Math.random() * 20]),
     asks: Array(20).fill(0).map((_, i) => [currentPrice + (i + 1) * 5, 10 + Math.random() * 20])
   };
   
   // モックのポジション
-  const positions = [
+  const positions: Position[] = [
     {
       symbol: 'ETH-PERP',
       size: 1.5,
@@ -61,7 +62,7 @@ const generateMockData = () => {
   ];
   
   // モックの最近の取引
-  const recentTrades = Array(20).fill(0).map((_, i) => ({
+  const recentTrades: Trade[] = Array(20).fill(0).map((_, i) => ({
     id: `trade-${i}`,
     price: currentPrice - 50 + Math.random() * 100,
     size: 0.1 + Math.random() * 2,
@@ -73,6 +74,7 @@ const generateMockData = () => {
   const previousPrice = currentPrice - 10 + Math.random() * 20;
   
   return {
+    timestamp: Date.now(),
     price: currentPrice,
     previousPrice,
     priceChange: currentPrice - previousPrice,
@@ -85,7 +87,7 @@ const generateMockData = () => {
 // モックのOHLCVデータ生成
 const generateMockOHLCVData = (timeframe: string, count: number = 100) => {
   const now = new Date();
-  const data = [];
+  const data: OHLCVData[] = [];
   
   // タイムフレームに応じた時間間隔を設定
   let interval: number;
@@ -109,9 +111,10 @@ const generateMockOHLCVData = (timeframe: string, count: number = 100) => {
   // 基準価格
   let basePrice = 3000;
   
-  // 過去のデータから生成
-  for (let i = count - 1; i >= 0; i--) {
-    const time = new Date(now.getTime() - i * interval);
+  // データポイントを生成
+  for (let i = 0; i < count; i++) {
+    // 時間を計算
+    const time = new Date(now.getTime() - (count - i) * interval);
     
     // 価格の変動をシミュレート
     const volatility = 0.02; // 2%の変動
@@ -125,7 +128,7 @@ const generateMockOHLCVData = (timeframe: string, count: number = 100) => {
     const volume = 100 + Math.random() * 900; // 100-1000の範囲
     
     data.push({
-      time: time.toISOString(),
+      time: time.getTime(), // toISOString()からgetTime()に変更
       open,
       high,
       low,
@@ -136,144 +139,6 @@ const generateMockOHLCVData = (timeframe: string, count: number = 100) => {
   
   return data;
 };
-
-/**
- * オーダーブックデータの型
- */
-export interface OrderBook {
-  bids: [number, number][]; // [価格, 数量]のペアの配列
-  asks: [number, number][]; // [価格, 数量]のペアの配列
-}
-
-/**
- * ポジションデータの型
- */
-export interface Position {
-  symbol: string;
-  size: number;
-  entryPrice: number;
-  markPrice: number;
-  liquidationPrice: number;
-  margin: number;
-  leverage: number;
-  unrealizedPnl: number;
-  unrealizedPnlPercent: number;
-}
-
-/**
- * 取引データの型
- */
-export interface Trade {
-  id: string;
-  price: number;
-  size: number;
-  side: 'buy' | 'sell';
-  timestamp: string;
-}
-
-/**
- * 市場データの型
- */
-export interface MarketData {
-  price: number;
-  previousPrice: number;
-  priceChange: number;
-  orderBook: OrderBook;
-  positions: Position[];
-  recentTrades: Trade[];
-}
-
-/**
- * OHLCVデータの型
- */
-export interface OHLCVData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
-
-/**
- * 注文タイプ
- */
-export enum OrderType {
-  MARKET = 'market',
-  LIMIT = 'limit',
-  STOP_MARKET = 'stopMarket',
-  STOP_LIMIT = 'stopLimit',
-  TAKE_PROFIT_MARKET = 'takeProfitMarket',
-  TAKE_PROFIT_LIMIT = 'takeProfitLimit'
-}
-
-/**
- * 注文サイド
- */
-export enum OrderSide {
-  BUY = 'buy',
-  SELL = 'sell'
-}
-
-/**
- * 注文の有効期限
- */
-export enum TimeInForce {
-  GTC = 'gtc', // Good Till Cancel
-  IOC = 'ioc', // Immediate Or Cancel
-  FOK = 'fok'  // Fill Or Kill
-}
-
-/**
- * 注文パラメータの型
- */
-export interface OrderParams {
-  symbol: string;
-  side: OrderSide;
-  type: OrderType;
-  size: number;
-  price?: number;
-  stopPrice?: number;
-  reduceOnly?: boolean;
-  postOnly?: boolean;
-  timeInForce?: TimeInForce;
-  clientOrderId?: string;
-}
-
-/**
- * 注文レスポンスの型
- */
-export interface OrderResponse {
-  orderId: string;
-  clientOrderId?: string;
-  symbol: string;
-  side: OrderSide;
-  type: OrderType;
-  size: number;
-  price?: number;
-  stopPrice?: number;
-  reduceOnly: boolean;
-  postOnly: boolean;
-  timeInForce: TimeInForce;
-  status: string;
-  timestamp: string;
-}
-
-/**
- * 銘柄情報の型
- */
-export interface SymbolInfo {
-  symbol: string;
-  baseCurrency: string;
-  quoteCurrency: string;
-  pricePrecision: number;
-  quantityPrecision: number;
-  minOrderSize: number;
-  maxLeverage: number;
-  tradingFee: number;
-  fundingRate: number;
-  isActive: boolean;
-}
 
 /**
  * 市場データを取得する
@@ -324,6 +189,7 @@ export const fetchMarketData = async (symbol: string = 'ETH-PERP', useMock: bool
     }
     
     return {
+      timestamp: Date.now(),
       price: currentPrice,
       previousPrice,
       priceChange: currentPrice - previousPrice,
@@ -590,50 +456,57 @@ export const fetchAvailableSymbols = async (useMock: boolean = false): Promise<A
     return {
       success: true,
       data: mockSymbols,
-      error: null
+      error: undefined
     };
   }
   
   try {
     const client = getApiClient();
-    const response = await client.get('/info/markets');
+    const response = await client.get<SymbolInfo[]>('/api/symbols');
     
     if (response.success && response.data) {
       // APIレスポンスを適切な形式に変換
-      const symbols: SymbolInfo[] = response.data.map((item: any) => ({
-        symbol: item.symbol,
-        baseCurrency: item.baseCurrency,
-        quoteCurrency: item.quoteCurrency,
-        pricePrecision: item.pricePrecision,
-        quantityPrecision: item.quantityPrecision,
-        minOrderSize: item.minOrderSize,
-        maxLeverage: item.maxLeverage,
-        tradingFee: item.tradingFee,
-        fundingRate: item.fundingRate,
-        isActive: item.isActive
-      }));
+      const symbols: SymbolInfo[] = Array.isArray(response.data) 
+        ? response.data.map((item: any) => ({
+          symbol: item.symbol,
+          baseCurrency: item.baseCurrency,
+          quoteCurrency: item.quoteCurrency,
+          pricePrecision: item.pricePrecision,
+          quantityPrecision: item.quantityPrecision,
+          minOrderSize: item.minOrderSize,
+          maxLeverage: item.maxLeverage,
+          tradingFee: item.tradingFee,
+          fundingRate: item.fundingRate,
+          isActive: item.isActive
+        }))
+        : [];
       
       return {
         success: true,
         data: symbols,
-        error: null
+        error: undefined
       };
     }
     
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: response.error || 'Failed to fetch available symbols'
     };
   } catch (error) {
     console.error('Error fetching available symbols:', error);
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 };
+
+/**
+ * 利用可能な銘柄一覧を取得する（エイリアス）
+ */
+export const getAvailableSymbols = fetchAvailableSymbols;
 
 /**
  * 注文履歴を取得する
@@ -651,21 +524,21 @@ export const fetchOrderHistory = async (
     // モックデータを返す
     const mockOrders: Order[] = Array(limit).fill(0).map((_, i) => ({
       id: `order-${i}`,
-      symbol: symbol || (Math.random() > 0.5 ? 'ETH-PERP' : 'BTC-PERP'),
-      side: Math.random() > 0.5 ? 'buy' : 'sell',
-      type: Math.random() > 0.3 ? 'limit' : 'market',
-      price: Math.random() > 0.3 ? 3000 + Math.random() * 500 : 0,
+      symbol: symbol || 'ETH-PERP',
+      side: Math.random() > 0.5 ? OrderSide.BUY : OrderSide.SELL,
+      type: Math.random() > 0.3 ? OrderType.LIMIT : OrderType.MARKET,
+      price: 3000 + Math.random() * 500,
       quantity: 0.1 + Math.random() * 2,
-      filledQuantity: Math.random() > 0.3 ? 0 : (0.1 + Math.random() * 2),
-      status: ['open', 'filled', 'partially_filled', 'canceled'][Math.floor(Math.random() * 4)],
-      timestamp: Date.now() - Math.floor(Math.random() * 1000000),
-      timeInForce: ['GTC', 'IOC', 'FOK'][Math.floor(Math.random() * 3)]
+      filledQuantity: Math.random() > 0.5 ? 0 : (0.1 + Math.random() * 2),
+      status: Math.random() > 0.6 ? OrderStatus.OPEN : (Math.random() > 0.5 ? OrderStatus.FILLED : OrderStatus.CANCELED),
+      timestamp: Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000),
+      timeInForce: TimeInForce.GTC
     }));
     
     return {
       success: true,
       data: mockOrders,
-      error: null
+      error: undefined
     };
   }
   
@@ -680,40 +553,47 @@ export const fetchOrderHistory = async (
     
     if (response.success && response.data) {
       // APIレスポンスを適切な形式に変換
-      const orders: Order[] = response.data.map((item: any) => ({
-        id: item.orderId,
-        symbol: item.symbol,
-        side: item.side.toLowerCase(),
-        type: item.type.toLowerCase(),
-        price: item.price || 0,
-        quantity: item.quantity,
-        filledQuantity: item.filledQuantity,
-        status: item.status.toLowerCase(),
-        timestamp: new Date(item.timestamp).getTime(),
-        timeInForce: item.timeInForce
-      }));
+      const orders: Order[] = Array.isArray(response.data)
+        ? response.data.map((item: any) => ({
+          id: item.id,
+          symbol: item.symbol,
+          side: item.side as OrderSide,
+          type: item.type as OrderType,
+          price: item.price,
+          quantity: item.quantity,
+          filledQuantity: item.filledQuantity,
+          status: item.status as OrderStatus,
+          timestamp: new Date(item.timestamp).getTime(),
+          timeInForce: item.timeInForce as TimeInForce
+        }))
+        : [];
       
       return {
         success: true,
         data: orders,
-        error: null
+        error: undefined
       };
     }
     
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: response.error || 'Failed to fetch order history'
     };
   } catch (error) {
     console.error('Error fetching order history:', error);
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 };
+
+/**
+ * 注文履歴を取得する（エイリアス）
+ */
+export const getOrderHistory = fetchOrderHistory;
 
 /**
  * 注文板データを取得する
